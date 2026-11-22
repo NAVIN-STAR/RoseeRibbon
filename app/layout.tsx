@@ -5,17 +5,20 @@ import { CartDrawer } from "@/components/CartDrawer";
 import { CustomHamperBuilderModal } from "@/components/CustomHamperBuilderModal";
 import { FloatingWhatsAppButton } from "@/components/FloatingWhatsAppButton";
 
+const isGithubPages = process.env.NEXT_PUBLIC_GITHUB_PAGES === "true";
+const basePath = isGithubPages ? "/RoseeRibbon" : "";
+
 export const metadata: Metadata = {
   title: "Rosee Ribbon | Botanical Candles, Crochet Blooms & Gift Hampers | Bangalore",
   description:
     "Bespoke artisanal creations: 100% botanical soy candles, everlasting crochet flower bouquets, and luxury curated gift hampers. Handcrafted in Bangalore.",
   icons: {
     icon: [
-      { url: "/favicon.ico" },
-      { url: "/icon.png", type: "image/png", sizes: "512x512" },
+      { url: `${basePath}/favicon.ico` },
+      { url: `${basePath}/icon.png`, type: "image/png", sizes: "512x512" },
     ],
     apple: [
-      { url: "/apple-icon.png", sizes: "180x180", type: "image/png" },
+      { url: `${basePath}/apple-icon.png`, sizes: "180x180", type: "image/png" },
     ],
   },
   keywords: [
@@ -38,6 +41,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <link rel="icon" href={`${basePath}/favicon.ico`} sizes="any" />
+        <link rel="shortcut icon" href={`${basePath}/favicon.ico`} />
+        <link rel="icon" href={`${basePath}/icon.png`} type="image/png" sizes="512x512" />
+        <link rel="apple-touch-icon" href={`${basePath}/apple-icon.png`} sizes="180x180" type="image/png" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
