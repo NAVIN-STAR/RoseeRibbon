@@ -1,24 +1,36 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { CartItem, CategoryId, CustomHamperDetails, Product, ProductVariant } from "@/types/product";
+import { CartItem, CategoryId, CustomHamperDetails, Product, ProductVariant, DeliveryAddress } from "@/types/product";
 
 interface CartContextType {
   items: CartItem[];
   isOpen: boolean;
   openCart: () => void;
   closeCart: () => void;
-  addToCart: (product: Product, variant?: ProductVariant, quantity?: number) => void;
+  addToCart: (
+    product: Product,
+    variant?: ProductVariant,
+    quantity?: number,
+    customCardMessage?: string
+  ) => void;
   addCustomHamper: (details: CustomHamperDetails, totalPrice: number) => void;
   removeFromCart: (productId: string, variantId?: string) => void;
   updateQuantity: (productId: string, quantity: number, variantId?: string) => void;
   clearCart: () => void;
   totalItems: number;
   subtotal: number;
+  deliveryFee: number;
+  orderTotal: number;
+  isFreeDelivery: boolean;
+  freeDeliveryRemaining: number;
   customMessage: string;
   setCustomMessage: (msg: string) => void;
   pincode: string;
   setPincode: (pin: string) => void;
+  deliveryAddress: DeliveryAddress;
+  setDeliveryAddress: React.Dispatch<React.SetStateAction<DeliveryAddress>>;
+  updateDeliveryAddress: (field: keyof DeliveryAddress, value: string) => void;
   
   // Custom Hamper Builder Modal State
   isHamperBuilderOpen: boolean;
@@ -28,19 +40,41 @@ interface CartContextType {
   // Active Catalog Category Filter (Syncs Navbar with Catalog)
   activeCategory: CategoryId;
   setActiveCategory: (cat: CategoryId) => void;
+
+  // Global QuickView & Catalog Search
+  quickViewProduct: Product | null;
+  quickViewVariant?: ProductVariant;
+  openQuickView: (product: Product, initialVariant?: ProductVariant) => void;
+  closeQuickView: () => void;
+  catalogSearchQuery: string;
+  setCatalogSearchQuery: (query: string) => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 const CART_STORAGE_KEY = "rosee_ribbon_cart_v1";
+const ADDRESS_STORAGE_KEY = "rosee_ribbon_address_v1";
+
+const defaultDeliveryAddress: DeliveryAddress = {
+  fullName: "",
+  phoneNumber: "",
+  flatBuilding: "",
+  streetArea: "",
+  pincode: "",
+  cityState: "",
+};
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isHamperBuilderOpen, setIsHamperBuilderOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState<CategoryId>("all");
+  const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
+  const [quickViewVariant, setQuickViewVariant] = useState<ProductVariant | undefined>(undefined);
+  const [catalogSearchQuery, setCatalogSearchQuery] = useState("");
   const [customMessage, setCustomMessage] = useState("");
-  const [pincode, setPincode] = useState("Bangalore, Karnataka");
+  const [pincode, setPincode] = useState("");
+  const [deliveryAddress, setDeliveryAddress] = useState<DeliveryAddress>(defaultDeliveryAddress);
   const [mounted, setMounted] = useState(false);
 
   // Load from localStorage on mount
@@ -50,6 +84,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const saved = localStorage.getItem(CART_STORAGE_KEY);
       if (saved) {
         setItems(JSON.parse(saved));
+      }
+      const savedAddr = localStorage.getItem(ADDRESS_STORAGE_KEY);
+      if (savedAddr) {
+        const parsed = JSON.parse(savedAddr);
+        setDeliveryAddress(parsed);
+        if (parsed.pincode) setPincode(parsed.pincode);
       }
     } catch {
       // Ignore errors reading localStorage
@@ -66,27 +106,50 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [items, mounted]);
 
+  // Save address to localStorage
+  useEffect(() => {
+    if (!mounted) return;
+    try {
+      localStorage.setItem(ADDRESS_STORAGE_KEY, JSON.stringify(deliveryAddress));
+    } catch {
+      // Ignore errors writing to localStorage
+    }
+  }, [deliveryAddress, mounted]);
+
+  const updateDeliveryAddress = (field: keyof DeliveryAddress, value: string) => {
+    setDeliveryAddress((prev) => ({ ...prev, [field]: value }));
+    if (field === "pincode") setPincode(value);
+  };
+
   const openCart = () => setIsOpen(true);
   const closeCart = () => setIsOpen(false);
 
   const openHamperBuilder = () => setIsHamperBuilderOpen(true);
   const closeHamperBuilder = () => setIsHamperBuilderOpen(false);
 
-  const addToCart = (product: Product, variant?: ProductVariant, quantity: number = 1) => {
+  const addToCart = (
+    product: Product,
+    variant?: ProductVariant,
+    quantity: number = 1,
+    customCardMessage?: string
+  ) => {
     setItems((prev) => {
       const existingIndex = prev.findIndex(
         (item) =>
           item.product.id === product.id &&
           item.selectedVariant?.id === variant?.id &&
+          item.customCardMessage === customCardMessage &&
           !item.customHamperDetails
       );
 
       if (existingIndex > -1) {
-        const next = [...prev];
-        next[existingIndex].quantity += quantity;
-        return next;
+        return prev.map((item, idx) =>
+          idx === existingIndex
+            ? { ...item, quantity: item.quantity + quantity }
+            : item
+        );
       } else {
-        return [...prev, { product, quantity, selectedVariant: variant }];
+        return [...prev, { product, quantity, selectedVariant: variant, customCardMessage }];
       }
     });
     setIsOpen(true);
@@ -118,7 +181,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       categoryLabel: "Custom Curated Hamper",
       basePrice: totalPrice,
       shortDescription: `Curated with ${summaryText}.`,
-      description: "Custom bespoke hamper assembled with signature Rosee Ribbon satin bow & wax seal.",
+      description: "Custom bespoke hamper assembled with signature Rosee Ribbon satin bow.",
       image: details.packaging.image || "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?auto=format&fit=crop&w=800&q=80",
       tags: ["custom", "bespoke", "hamper"],
     };
@@ -169,6 +232,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     return sum + price * item.quantity;
   }, 0);
 
+  const deliveryFee = items.length === 0 ? 0 : subtotal >= 999 ? 0 : 100;
+  const orderTotal = subtotal + deliveryFee;
+  const isFreeDelivery = subtotal >= 999;
+  const freeDeliveryRemaining = Math.max(0, 999 - subtotal);
+
   return (
     <CartContext.Provider
       value={{
@@ -183,15 +251,34 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         clearCart,
         totalItems,
         subtotal,
+        deliveryFee,
+        orderTotal,
+        isFreeDelivery,
+        freeDeliveryRemaining,
         customMessage,
         setCustomMessage,
         pincode,
         setPincode,
+        deliveryAddress,
+        setDeliveryAddress,
+        updateDeliveryAddress,
         isHamperBuilderOpen,
         openHamperBuilder,
         closeHamperBuilder,
         activeCategory,
         setActiveCategory,
+        quickViewProduct,
+        quickViewVariant,
+        openQuickView: (p: Product, initialVariant?: ProductVariant) => {
+          setQuickViewProduct(p);
+          setQuickViewVariant(initialVariant);
+        },
+        closeQuickView: () => {
+          setQuickViewProduct(null);
+          setQuickViewVariant(undefined);
+        },
+        catalogSearchQuery,
+        setCatalogSearchQuery,
       }}
     >
       {children}

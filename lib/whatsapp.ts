@@ -1,8 +1,8 @@
-import { CartItem, Product, ProductVariant } from "@/types/product";
+import { CartItem, Product, ProductVariant, DeliveryAddress } from "@/types/product";
 import { formatPrice } from "./utils";
 
 // Rosee Ribbon official WhatsApp contact
-export const ROSEE_RIBBON_WHATSAPP_NUMBER = "919876543210"; // Easily configured
+export const ROSEE_RIBBON_WHATSAPP_NUMBER = "918431941172"; // Easily configured
 
 /**
  * Creates a WhatsApp URL for an immediate single-product order/inquiry
@@ -10,20 +10,24 @@ export const ROSEE_RIBBON_WHATSAPP_NUMBER = "919876543210"; // Easily configured
 export function getSingleProductWhatsAppUrl(
   product: Product,
   variant?: ProductVariant,
-  phone: string = ROSEE_RIBBON_WHATSAPP_NUMBER
+  phone: string = ROSEE_RIBBON_WHATSAPP_NUMBER,
+  customCardMessage?: string
 ): string {
   const price = variant ? variant.price : product.basePrice;
   const variantText = variant ? `\n• *Option:* ${variant.name}` : "";
+  const cardNoteText = customCardMessage && customCardMessage.trim()
+    ? `\n• *Custom Card Message:* "${customCardMessage.trim()}"`
+    : "";
 
   const message = [
     `🌸 *ROSEE RIBBON — PRODUCT INQUIRY* 🌸`,
     `Hello! I came across your creations and would love to order:`,
     ``,
     `• *Item:* ${product.name}`,
-    `• *Category:* ${product.categoryLabel}${variantText}`,
+    `• *Category:* ${product.categoryLabel}${variantText}${cardNoteText}`,
     `• *Price:* ${formatPrice(price)}`,
     ``,
-    `Could you please share availability and delivery details for Bangalore?`,
+    `Could you please share availability and delivery details to my location?`,
     `Thank you! ✨`,
   ].join("\n");
 
@@ -36,7 +40,7 @@ export function getSingleProductWhatsAppUrl(
 export function getCartOrderWhatsAppUrl(
   items: CartItem[],
   customCardMessage: string = "",
-  deliveryLocation: string = "",
+  deliveryAddress?: DeliveryAddress | string,
   phone: string = ROSEE_RIBBON_WHATSAPP_NUMBER
 ): string {
   const subtotal = items.reduce((sum, item) => {
@@ -87,9 +91,16 @@ export function getCartOrderWhatsAppUrl(
 
       // Standard Product item
       const variantStr = item.selectedVariant ? ` (${item.selectedVariant.name})` : "";
-      return `${idx + 1}. *${item.product.name}*${variantStr}\n   • Qty: ${item.quantity} × ${formatPrice(unitPrice)} = ${formatPrice(unitPrice * item.quantity)}`;
+      const cardNoteStr = item.customCardMessage && item.customCardMessage.trim()
+        ? `\n   💌 *Card Message:* "${item.customCardMessage.trim()}"`
+        : "";
+      return `${idx + 1}. *${item.product.name}*${variantStr}${cardNoteStr}\n   • Qty: ${item.quantity} × ${formatPrice(unitPrice)} = ${formatPrice(unitPrice * item.quantity)}`;
     })
     .join("\n\n");
+
+  const deliveryFee = items.length === 0 ? 0 : subtotal >= 999 ? 0 : 100;
+  const orderTotal = subtotal + deliveryFee;
+  const deliveryStr = deliveryFee === 0 ? "FREE (Order above ₹999)" : `${formatPrice(deliveryFee)} (Orders below ₹999)`;
 
   const messageParts = [
     `🌸 *ROSEE RIBBON — NEW ORDER* 🌸`,
@@ -98,7 +109,9 @@ export function getCartOrderWhatsAppUrl(
     `*Order Items:*`,
     formattedItems,
     ``,
-    `*Total Order Value:* ${formatPrice(subtotal)} (All taxes & signature ribbon wrap included)`,
+    `• *Items Subtotal:* ${formatPrice(subtotal)}`,
+    `• *Delivery Charge:* ${deliveryStr}`,
+    `• *Total Amount Payable:* ${formatPrice(orderTotal)} (All taxes & signature ribbon wrap included)`,
     ``,
   ];
 
@@ -108,9 +121,25 @@ export function getCartOrderWhatsAppUrl(
     messageParts.push(``);
   }
 
-  if (deliveryLocation.trim()) {
-    messageParts.push(`📍 *Delivery Area / Address:* ${deliveryLocation.trim()}`);
-    messageParts.push(``);
+  if (deliveryAddress) {
+    if (typeof deliveryAddress === "object") {
+      const addrLines: string[] = [];
+      if (deliveryAddress.fullName?.trim()) addrLines.push(`• *Recipient Name:* ${deliveryAddress.fullName.trim()}`);
+      if (deliveryAddress.phoneNumber?.trim()) addrLines.push(`• *Phone Number:* ${deliveryAddress.phoneNumber.trim()}`);
+      if (deliveryAddress.flatBuilding?.trim()) addrLines.push(`• *Flat / House No. & Building:* ${deliveryAddress.flatBuilding.trim()}`);
+      if (deliveryAddress.streetArea?.trim()) addrLines.push(`• *Street / Area / Landmark:* ${deliveryAddress.streetArea.trim()}`);
+      if (deliveryAddress.cityState?.trim()) addrLines.push(`• *City & State:* ${deliveryAddress.cityState.trim()}`);
+      if (deliveryAddress.pincode?.trim()) addrLines.push(`• *Postal Code (PIN):* ${deliveryAddress.pincode.trim()}`);
+
+      if (addrLines.length > 0) {
+        messageParts.push(`📍 *Delivery Address (Across India):*`);
+        messageParts.push(addrLines.join("\n"));
+        messageParts.push(``);
+      }
+    } else if (typeof deliveryAddress === "string" && deliveryAddress.trim()) {
+      messageParts.push(`📍 *Delivery Area / Address:* ${deliveryAddress.trim()}`);
+      messageParts.push(``);
+    }
   }
 
   messageParts.push(`Please confirm if this order can be processed. Looking forward to your reply! ✨`);

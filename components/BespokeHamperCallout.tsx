@@ -1,54 +1,44 @@
 "use client";
 
 import React from "react";
-import { motion } from "framer-motion";
-import { Gift, Sparkles, MessageCircle, HeartHandshake } from "lucide-react";
+import { Gift, ArrowRight } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 
 export function BespokeHamperCallout() {
   const { openHamperBuilder } = useCart();
 
   return (
-    <section id="hampers" className="py-12 px-4 sm:px-6 lg:px-8">
+    <section id="hampers" className="py-14 md:py-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <div className="relative bg-[#F5EFE6] rounded-[36px] p-8 sm:p-12 lg:p-14 border border-[#EADBCE] overflow-hidden shadow-subtle">
-          
-          {/* Subtle background glow */}
-          <div className="absolute -top-24 -right-24 w-96 h-96 bg-[#6B1D2F]/5 rounded-full blur-3xl pointer-events-none" />
-
-          <div className="relative z-10 max-w-2xl">
-            <div className="inline-flex items-center gap-2 mb-3">
-              <Gift className="w-4 h-4 text-[#6B1D2F]" />
-              <span className="text-[11px] font-semibold tracking-widest uppercase text-[#736163]">
-                BESPOKE GIFTING CONCIERGE
-              </span>
+        <div className="relative bg-white rounded-[32px] p-8 sm:p-14 lg:p-16 border border-[#E8DFD3] shadow-card">
+          <div className="max-w-2xl">
+            <div className="text-[11px] font-sans font-bold tracking-wider uppercase text-[#4A121A] mb-3">
+              Custom Gifting
             </div>
 
-            <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-normal text-[#241517] leading-tight mb-4">
-              Curate your own bespoke hamper.
+            <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-medium sm:font-semibold text-[#14080A] leading-tight mb-4">
+              Curate a custom hamper.
             </h2>
 
-            <p className="text-sm sm:text-base text-[#5A4B4D] leading-relaxed mb-8">
-              Every celebration is unique. Pick any hand-poured candle, choose your favorite
-              everlasting crochet stems, and let our studio assemble it in our rigid keepsake box,
-              tied with a signature satin ribbon and personalized calligraphy note.
+            <p className="text-sm sm:text-base text-[#241517] leading-relaxed mb-8 font-sans">
+              Hand-select any botanical soy candle, choose your everlasting crochet stems,
+              and our Bangalore studio will pack it in a rigid keepsake box tied with signature
+              silk ribbon and a handwritten message card.
             </p>
 
-            <div className="flex flex-wrap items-center gap-4">
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.96 }}
+            <div className="flex flex-wrap items-center gap-6">
+              <button
                 onClick={openHamperBuilder}
-                className="bg-[#6B1D2F] hover:bg-[#521422] text-white px-7 py-3.5 rounded-full text-sm font-medium tracking-wide shadow-sm flex items-center gap-2 transition-all"
+                className="bg-[#4A121A] hover:bg-[#350C12] text-white px-8 py-3.5 rounded-full text-xs sm:text-sm font-sans font-semibold tracking-wider uppercase shadow-luxury flex items-center gap-2 transition-all active:translate-y-0.5"
               >
-                <Sparkles className="w-4 h-4" />
-                <span>Open Custom Hamper Builder</span>
-              </motion.button>
+                <Gift className="w-4 h-4 text-[#E8DCB8]" />
+                <span>Open Hamper Studio</span>
+                <ArrowRight className="w-3.5 h-3.5 ml-1" />
+              </button>
 
-              <div className="text-xs text-[#736163] flex items-center gap-2">
-                <HeartHandshake className="w-4 h-4 text-[#6B1D2F]" />
-                <span>Discounts available for bulk & corporate orders</span>
-              </div>
+              <span className="text-xs text-[#3D282B] font-sans font-medium">
+                Corporate and wedding bulk inquiries welcome.
+              </span>
             </div>
           </div>
         </div>

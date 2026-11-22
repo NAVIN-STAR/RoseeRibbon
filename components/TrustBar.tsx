@@ -1,47 +1,58 @@
 "use client";
 
 import React from "react";
-import { motion } from "framer-motion";
-import { MapPin, Heart, Sparkles } from "lucide-react";
 
 export function TrustBar() {
   return (
-    <section className="py-2 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-6xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.35, ease: [0.23, 1, 0.32, 1] }}
-          className="bg-white/85 backdrop-blur-md rounded-full py-3.5 px-6 sm:px-10 border border-[#EADBCE] shadow-[0_2px_14px_rgba(36,21,23,0.03)] flex flex-col md:flex-row items-center justify-between gap-3 text-xs sm:text-sm text-[#4A3B3D]"
-        >
-          {/* Proposition 1: Bangalore atelier */}
-          <div className="flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#6B1D2F]" />
-            <span className="font-medium text-[#241517]">
-              Handcrafted in Bangalore · Doorstep Delivery
-            </span>
+    <section className="py-10 border-y border-[#E8DFD3] bg-[#FAF6F0]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        {/* Architectural 3-Pillar Ledger (Numbered, grounded, no middle dots or cheesy icons) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 divide-y md:divide-y-0 md:divide-x divide-[#E8DFD3]">
+          
+          {/* Pillar 1 */}
+          <div className="pt-4 md:pt-0">
+            <div className="text-[11px] font-sans font-bold tracking-wider text-[#4A121A] mb-2 uppercase">
+              01 / Pure Soy Wax
+            </div>
+            <h3 className="font-serif text-xl sm:text-2xl text-[#14080A] font-semibold mb-2">
+              Clean burn with botanical oils
+            </h3>
+            <p className="text-[13px] sm:text-sm text-[#2D1C1F] leading-relaxed max-w-sm">
+              Hand-poured using 100% natural golden soy wax, braided cotton wicks,
+              and phthalate-free fragrance oils. Zero paraffin, zero toxic soot.
+            </p>
           </div>
 
-          <div className="hidden md:block w-px h-3 bg-[#EADBCE]" />
-
-          {/* Proposition 2: Handwritten Card */}
-          <div className="flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#6B1D2F]" />
-            <span className="font-medium text-[#241517]">
-              Handwritten wax-sealed message card on every order
-            </span>
+          {/* Pillar 2 */}
+          <div className="pt-6 md:pt-0 md:pl-10">
+            <div className="text-[11px] font-sans font-bold tracking-wider text-[#4A121A] mb-2 uppercase">
+              02 / Everlasting Blooms
+            </div>
+            <h3 className="font-serif text-xl sm:text-2xl text-[#14080A] font-semibold mb-2">
+              Stitched from combed milk cotton
+            </h3>
+            <p className="text-[13px] sm:text-sm text-[#2D1C1F] leading-relaxed max-w-sm">
+              Each petal and leaf is hand-crocheted with a flexible internal wire core.
+              A botanical arrangement that keeps its shape and color forever.
+            </p>
           </div>
 
-          <div className="hidden md:block w-px h-3 bg-[#EADBCE]" />
-
-          {/* Proposition 3: Transparency */}
-          <div className="flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#6B1D2F]" />
-            <span className="font-medium text-[#241517]">
-              All prices include packaging & taxes
-            </span>
+          {/* Pillar 3 */}
+          <div className="pt-6 md:pt-0 md:pl-10">
+            <div className="text-[11px] font-sans font-bold tracking-wider text-[#4A121A] mb-2 uppercase">
+              03 / Pan-India Delivery
+            </div>
+            <h3 className="font-serif text-xl sm:text-2xl text-[#14080A] font-semibold mb-2">
+              Free Delivery Above ₹999
+            </h3>
+            <p className="text-[13px] sm:text-sm text-[#2D1C1F] leading-relaxed max-w-sm">
+              Enjoy complimentary doorstep delivery across India on orders above ₹999 (₹100 standard delivery on smaller orders). Securely packed with personalized keepsake card.
+            </p>
           </div>
-        </motion.div>
+
+        </div>
+
       </div>
     </section>
   );

@@ -1,10 +1,20 @@
-export type CategoryId = 'all' | 'candles' | 'crochet-flowers' | 'hampers';
+export type CategoryId = 
+  | 'all' 
+  | 'candles' 
+  | 'crochet-flowers' 
+  | 'crochet-single' 
+  | 'crochet-bouquets' 
+  | 'bouquet-1' 
+  | 'bouquet-3' 
+  | 'hampers';
 
 export interface ProductVariant {
   id: string;
   name: string;
   price: number;
   inStock: boolean;
+  image?: string;
+  images?: string[];
 }
 
 export interface CustomHamperItem {
@@ -13,6 +23,9 @@ export interface CustomHamperItem {
   price: number;
   image?: string;
   tag?: string;
+  color?: string;
+  variantId?: string;
+  variantName?: string;
 }
 
 export interface CustomHamperLineItem {
@@ -33,12 +46,15 @@ export interface Product {
   slug: string;
   name: string;
   category: 'candles' | 'crochet-flowers' | 'hampers';
+  crochetSubcategory?: 'single' | 'bouquet';
+  bouquetType?: '1-flower' | '3-flower';
   categoryLabel: string;
   shortDescription: string;
   description: string;
   basePrice: number;
   image: string;
   secondaryImage?: string;
+  images?: string[]; // Slideshow / gallery images
   badge?: string;
   tags: string[];
   isFeatured?: boolean;
@@ -55,6 +71,7 @@ export interface Product {
   stemLength?: string;
   hamperContents?: string[];
   variants?: ProductVariant[];
+  allowStemCount?: boolean; // For single flowers: user can choose number of flowers
 }
 
 export interface CartItem {
@@ -62,4 +79,15 @@ export interface CartItem {
   quantity: number;
   selectedVariant?: ProductVariant;
   customHamperDetails?: CustomHamperDetails;
+  stemCount?: number;
+  customCardMessage?: string;
+}
+
+export interface DeliveryAddress {
+  fullName: string;
+  phoneNumber: string;
+  flatBuilding: string;
+  streetArea: string;
+  pincode: string;
+  cityState: string;
 }
