@@ -1,8 +1,14 @@
 /** @type {import('next').NextConfig} */
+const isGithubPages = process.env.GITHUB_PAGES === "true";
+const basePath = isGithubPages ? "/RoseeRibbon" : "";
+
 const nextConfig = {
+  output: "export",
+  basePath: basePath || undefined,
   optimizeFonts: false,
   images: {
-    unoptimized: true,
+    loader: "custom",
+    loaderFile: "./lib/imageLoader.js",
   },
 };
 
